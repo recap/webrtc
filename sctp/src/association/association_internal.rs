@@ -1040,11 +1040,7 @@ impl AssociationInternal {
             bytes_queued += s.get_num_bytes_in_reassembly_queue().await as u32;
         }
 
-        if bytes_queued >= self.max_receive_buffer_size {
-            0
-        } else {
-            self.max_receive_buffer_size - bytes_queued
-        }
+        self.max_receive_buffer_size.saturating_sub(bytes_queued)
     }
 
     pub(crate) fn open_stream(
@@ -1264,7 +1260,7 @@ impl AssociationInternal {
             //      most, the lesser of 1) the total size of the previously
             //      outstanding DATA chunk(s) acknowledged, and 2) the destination's
             //      path MTU.
-            if !self.in_fast_recovery && self.pending_queue.len() > 0 {
+            if !self.in_fast_recovery && !self.pending_queue.is_empty() {
                 self.cwnd += std::cmp::min(total_bytes_acked as u32, self.cwnd); // TCP way
                                                                                  // self.cwnd += min32(uint32(total_bytes_acked), self.mtu) // SCTP way (slow)
                 log::trace!(
@@ -1299,7 +1295,7 @@ impl AssociationInternal {
             //      of data outstanding (i.e., before arrival of the SACK, flight size
             //      was greater than or equal to cwnd), increase cwnd by MTU, and
             //      reset partial_bytes_acked to (partial_bytes_acked - cwnd).
-            if self.partial_bytes_acked >= self.cwnd && self.pending_queue.len() > 0 {
+            if self.partial_bytes_acked >= self.cwnd && !self.pending_queue.is_empty() {
                 self.partial_bytes_acked -= self.cwnd;
                 self.cwnd += self.mtu;
                 log::trace!(
@@ -1658,7 +1654,7 @@ impl AssociationInternal {
     }
 
     async fn handle_forward_tsn(&mut self, c: &ChunkForwardTsn) -> Result<Vec<Packet>> {
-        log::trace!("[{}] FwdTSN: {}", self.name, c.to_string());
+        log::trace!("[{}] FwdTSN: {}", self.name, c);
 
         if !self.use_forward_tsn {
             log::warn!("[{}] received FwdTSN but not enabled", self.name);
@@ -1905,7 +1901,7 @@ impl AssociationInternal {
         let mut chunks = vec![];
         let mut sis_to_reset = vec![]; // stream identifiers to reset
 
-        if self.pending_queue.len() == 0 {
+        if self.pending_queue.is_empty() {
             return (chunks, sis_to_reset);
         }
 

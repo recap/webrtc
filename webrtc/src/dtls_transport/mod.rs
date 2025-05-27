@@ -44,9 +44,7 @@ pub mod dtls_transport_state;
 pub(crate) fn default_srtp_protection_profiles() -> Vec<SrtpProtectionProfile> {
     vec![
         SrtpProtectionProfile::Srtp_Aead_Aes_128_Gcm,
-        SrtpProtectionProfile::Srtp_Aead_Aes_256_Gcm,
         SrtpProtectionProfile::Srtp_Aes128_Cm_Hmac_Sha1_80,
-        SrtpProtectionProfile::Srtp_Aes128_Cm_Hmac_Sha1_32,
     ]
 }
 
@@ -416,14 +414,8 @@ impl RTCDtlsTransport {
                 dtls::extension::extension_use_srtp::SrtpProtectionProfile::Srtp_Aead_Aes_128_Gcm => {
                     srtp::protection_profile::ProtectionProfile::AeadAes128Gcm
                 }
-                dtls::extension::extension_use_srtp::SrtpProtectionProfile::Srtp_Aead_Aes_256_Gcm => {
-                    srtp::protection_profile::ProtectionProfile::AeadAes256Gcm
-                }
                 dtls::extension::extension_use_srtp::SrtpProtectionProfile::Srtp_Aes128_Cm_Hmac_Sha1_80 => {
                     srtp::protection_profile::ProtectionProfile::Aes128CmHmacSha1_80
-                }
-                dtls::extension::extension_use_srtp::SrtpProtectionProfile::Srtp_Aes128_Cm_Hmac_Sha1_32 => {
-                    srtp::protection_profile::ProtectionProfile::Aes128CmHmacSha1_32
                 }
                 _ => {
                     if let Err(err) = dtls_conn.close().await {
