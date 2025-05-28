@@ -470,9 +470,15 @@ impl Association {
             let (packets, continue_loop) = {
                 // Yielding here fixes a deadlock that crops up when requestor and responder are
                 // using the same tokio event loop as in examples/data=channels-flow-control
-                tokio::task::yield_now().await;
-                let mut ai = association_internal.lock().await;
-                ai.gather_outbound().await
+                // Using non blocking lock with try_lock since lock can block indefinitely
+                loop {
+                    if let Ok(mut ai) = association_internal.try_lock() {
+                        break ai.gather_outbound().await;
+                    } else {
+                        // If we can't get the lock, we yield to allow other tasks to run
+                        tokio::task::yield_now().await;
+                    }
+                }
             };
             //log::debug!("[{}] gather_outbound done with {}", name, packets.len());
 

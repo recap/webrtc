@@ -1,3 +1,4 @@
+use console_subscriber;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime};
@@ -161,6 +162,7 @@ async fn create_responder() -> anyhow::Result<RTCPeerConnection> {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     env_logger::init();
+    console_subscriber::init();
 
     let requester = Arc::new(create_requester().await?);
     let responder = Arc::new(create_responder().await?);
