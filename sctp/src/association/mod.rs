@@ -425,6 +425,8 @@ impl Association {
                     }
                 }
             };
+            // Yielding here seems to provide a slight (~3%) throughput performance improvement.
+            tokio::task::yield_now().await;
 
             // Make a buffer sized to what we read, then copy the data we
             // read from the underlying transport. We do this because the
@@ -524,6 +526,11 @@ impl Association {
                 }
                 //log::debug!("[{}] sending {} bytes done", name, raw.len());
             }
+
+            // Yielding here seems to minimize deadlock risk when both requestor and
+            // responder are using the same tokio runtime as in the example
+            // data-channel-flow-control
+            tokio::task::yield_now().await;
 
             if !continue_loop {
                 break;
