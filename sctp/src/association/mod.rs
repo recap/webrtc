@@ -468,6 +468,7 @@ impl Association {
         'outer: while !done.load(Ordering::Relaxed) {
             //log::debug!("[{}] gather_outbound begin", name);
             let (packets, continue_loop) = {
+                tokio::task::yield_now().await; // Yield to allow read_loop to make progress
                 let mut ai = association_internal.lock().await;
                 ai.gather_outbound().await
             };
