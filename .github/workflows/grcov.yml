@@ -2,9 +2,10 @@ name: coverage
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -50,8 +51,8 @@ jobs:
           args: --all --no-fail-fast ${{ matrix.cargo_flags }}
         env:
           CARGO_INCREMENTAL: "0"
-          RUSTFLAGS: '-Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort -Cdebug-assertions=off -Cprofile-generate=target/debug'
-          RUSTDOCFLAGS: '-Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort -Cdebug-assertions=off -Cprofile-generate=target/debug'
+          RUSTFLAGS: "-Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort -Cdebug-assertions=off -Cprofile-generate=target/debug"
+          RUSTDOCFLAGS: "-Ccodegen-units=1 -Copt-level=0 -Clink-dead-code -Coverflow-checks=off -Zpanic_abort_tests -Cpanic=abort -Cdebug-assertions=off -Cprofile-generate=target/debug"
 
       - name: Generate coverage data
         id: grcov
